@@ -22,6 +22,15 @@ client = GeminiClient(SECURE_1PSID, SECURE_1PSIDTS)
 
 app = FastAPI(title="Gemini to OpenAI API")
 
+from fastapi.middleware.cors import CORSMiddleware
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], 
+    allow_methods=["*"], 
+    allow_headers=["*"],
+)
+
 # --- Pydantic 模型 (OpenAI 规范，适配 Roo Cline) ---
 
 class ChatMessage(BaseModel):

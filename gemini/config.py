@@ -19,7 +19,7 @@ def readJson(filePath: str) -> dict:
 
 def setConfig(key: str, value: Any) -> bool:
     try:
-        configFilePath = os.path.join(Path(__file__).parents[1], "config", "config.json")
+        configFilePath = os.path.join(Path(__file__).parents[0], "config.json")
         Path(os.path.dirname(configFilePath)).mkdir(parents=True, exist_ok=True)
 
         config = loadConfig()
@@ -38,7 +38,7 @@ def setConfig(key: str, value: Any) -> bool:
         return False
 
 def loadConfig() -> dict:
-    configFilePath = os.path.join(Path(__file__).parents[1], "config", "config.json")
+    configFilePath = os.path.join(Path(__file__).parents[0], "config.json")
     if not os.path.exists(configFilePath):
         raise FileNotFoundError(f"Config file not found: {configFilePath}")
 

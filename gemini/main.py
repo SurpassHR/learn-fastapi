@@ -1,3 +1,4 @@
+from textwrap import indent
 import time
 import json
 import orjson
@@ -14,10 +15,11 @@ from gemini_webapi import GeminiClient
 from bc3 import get_secure_code
 
 from config import getConfig
+from logger import logger
 
 # --- 配置区 ---
 # 假设 get_secure_code 会自动从浏览器或配置文件获取最新的 Cookie
-SECURE_1PSID, SECURE_1PSIDTS = get_secure_code()
+SECURE_1PSID, SECURE_1PSIDTS = get_secure_code([".google.com"])
 client = GeminiClient(SECURE_1PSID, SECURE_1PSIDTS)
 
 app = FastAPI(title="Gemini to OpenAI API")
@@ -102,12 +104,12 @@ async def verify_api_key(auth: HTTPAuthorizationCredentials = Depends(security))
 # --- 错误处理 ---
 
 @app.exception_handler(RequestValidationError)
-async def validation_exception_handler(request: Request, exc: RequestValidationError):
+async def validation_exception_handler(request: Request, enxc: RequestValidationError):
     # 如果仍然出现 422，这里会打印出详细的字段错误
     # print(f"DEBUG - 参数校验失败: {exc.errors()}")
     return JSONResponse(
         status_code=422,
-        content={"detail": exc.errors(), "body": await request.body()},
+        content={"detail": enxc.errors(), "body": await request.body()},
     )
 
 # --- 接口实现 ---
@@ -140,6 +142,7 @@ async def list_models(token: str = Depends(verify_api_key)):
 
 @app.post("/v1/chat/completions")
 async def chat_completions(request_data: ChatCompletionRequest, token: str = Depends(verify_api_key)):
+    logger.info(f"DEBUG - 接收到请求数据:\n{json.dumps(request_data.model_dump(), indent=2)}")
     model_name = request_data.model
     prompt = parse_messages_to_prompt(request_data.messages)
     
@@ -192,4 +195,4 @@ async def chat_completions(request_data: ChatCompletionRequest, token: str = Dep
 if __name__ == "__main__":
     import uvicorn
     # 使用 reload=True 方便你改代码自动重启
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=8001, reload=True)
